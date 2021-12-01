@@ -1,4 +1,4 @@
-# AdventOfCode.Template
+# AdventOfCode 2021
 
 ![CI](https://github.com/eduherminio/AdventOfCode.Template/workflows/CI/badge.svg)
 
