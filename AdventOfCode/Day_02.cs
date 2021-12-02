@@ -1,51 +1,5 @@
 ﻿namespace AdventOfCode;
 
-public struct VectorL : IEquatable<VectorL>
-{
-    public long X;
-    public long Y;
-
-    public VectorL(long x, long y)
-    {
-        X = x;
-        Y = y;
-    }
-
-    public static VectorL operator +(VectorL left, VectorL right)
-    {
-        return new VectorL(
-            left.X + right.X,
-            left.Y + right.Y
-        );
-    }
-
-    public static bool operator ==(VectorL left, VectorL right)
-    {
-        return (left.X == right.X)
-            && (left.Y == right.Y);
-    }
-
-    public static bool operator !=(VectorL left, VectorL right)
-    {
-        return !(left == right);
-    }
-
-    public override bool Equals(object obj)
-    {
-        return obj is VectorL other && Equals(other);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(X, Y);
-    }
-
-    public bool Equals(VectorL other)
-    {
-        return this == other;
-    }
-}
-
 public class Day_02 : BaseDay
 {
     private readonly string[] _input;
@@ -59,22 +13,20 @@ public class Day_02 : BaseDay
     {
         var result = 0L;
 
-        var position = new VectorL(0, 0);
+        var position = (horizontal: 0L, depth: 0L);
 
-        foreach (var vector in _input.Select(x => GetInstructionVector(x.Split(' '))))
+        foreach (var instruction in _input.Select(x => GetInstructionVector(x.Split(' '))))
         {
-            if (vector != default)
-            {
-                position += vector;
-            }
+            position.horizontal += instruction.horizontal;
+            position.depth += instruction.depth;
         }
 
-        result = Convert.ToInt64(position.X * position.Y);
+        result = position.horizontal * position.depth;
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 1 is {result}");
     }
 
-    private VectorL GetInstructionVector(string[] instruction)
+    private (long horizontal, long depth) GetInstructionVector(string[] instruction)
     {
         if (instruction.Length != 2)
         {
@@ -82,13 +34,13 @@ public class Day_02 : BaseDay
         }
 
         var command = instruction[0];
-        var value = Convert.ToInt32(instruction[1]);
+        var value = Convert.ToInt64(instruction[1]);
 
         return command switch
         {
-            "forward" => new VectorL(value, 0),
-            "down" => new VectorL(0, value),
-            "up" => new VectorL(0, -value),
+            "forward" => (value, 0),
+            "down" => (0, value),
+            "up" => (0, -value),
             _ => default
         };
     }
@@ -97,18 +49,16 @@ public class Day_02 : BaseDay
     {
         var result = 0L;
 
-        var position = new VectorL(0, 0);
+        var position = (horizontal: 0L, depth: 0L);
 
-        foreach (var vector in _input.Select(x => GetInstructionVector(x.Split(' '))))
+        foreach (var instruction in _input.Select(x => GetInstructionVector(x.Split(' '))))
         {
-            if (vector != default)
-            {
-                position += vector;
-                result += Convert.ToInt64(vector.X * position.Y);
-            }
+            position.horizontal += instruction.horizontal;
+            position.depth += instruction.depth;
+            result += instruction.horizontal * position.depth;
         }
 
-        result = Convert.ToInt64(position.X * result);
+        result = position.horizontal * result;
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
     }
