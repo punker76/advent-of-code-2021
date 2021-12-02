@@ -1,6 +1,6 @@
 ﻿namespace AdventOfCode;
 
-public struct VectorL
+public struct VectorL : IEquatable<VectorL>
 {
     public long X;
     public long Y;
@@ -28,6 +28,21 @@ public struct VectorL
     public static bool operator !=(VectorL left, VectorL right)
     {
         return !(left == right);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is VectorL other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(X, Y);
+    }
+
+    public bool Equals(VectorL other)
+    {
+        return this == other;
     }
 }
 
