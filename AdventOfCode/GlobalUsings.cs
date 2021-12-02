@@ -1,2 +1,1 @@
-﻿global using System.Numerics;
-global using AoCHelper;
+﻿global using AoCHelper;
