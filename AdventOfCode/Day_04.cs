@@ -101,6 +101,28 @@ public class Day_04 : BaseDay
         return default;
     }
 
+    private(int number, BoardNumber[][] board) GetLastBoard()
+    {
+        var winnerBoards = new HashSet<BoardNumber[][]>();
+
+        foreach (var number in _numbers)
+        {
+            foreach (var board in _boards)
+            {
+                if (BoardWins(board, number))
+                {
+                    winnerBoards.Add(board);
+                    if (winnerBoards.Count == _boards.Count)
+                    {
+                        return (number, board);
+                    }
+                }
+            }
+        }
+
+        return default;
+    }
+
     public override ValueTask<string> Solve_1()
     {
         var(number, board) = GetWinnerBoard();
@@ -116,7 +138,13 @@ public class Day_04 : BaseDay
 
     public override ValueTask<string> Solve_2()
     {
-        var result = 0;
+        var(number, board) = GetLastBoard();
+
+#if DEBUG
+        PrintBoard(board);
+#endif
+
+        var result = number * GetUnmarkedBoardSum(board);
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
     }
