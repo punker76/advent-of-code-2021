@@ -59,9 +59,9 @@ public class Day_04 : BaseDay
 
     private bool BoardWins(BoardNumber[][] board, int number)
     {
-        foreach (var line in board)
+        foreach (var row in board)
         {
-            foreach (var(i, boardNumber) in line.Select(((item, index) => (index, item))))
+            foreach (var (i, boardNumber) in row.Select(((item, index) => (index, item))))
             {
                 if (boardNumber.number == number)
                 {
@@ -75,7 +75,7 @@ public class Day_04 : BaseDay
                 }
             }
 
-            var rowWins = line.All(x => x.found);
+            var rowWins = row.All(x => x.found);
             if (rowWins)
             {
                 return true;
@@ -85,7 +85,7 @@ public class Day_04 : BaseDay
         return false;
     }
 
-    private(int number, BoardNumber[][] board) GetWinnerBoard()
+    private (int number, BoardNumber[][] board) GetWinnerBoard()
     {
         foreach (var number in _numbers)
         {
@@ -101,21 +101,19 @@ public class Day_04 : BaseDay
         return default;
     }
 
-    private(int number, BoardNumber[][] board) GetLastBoard()
+    private (int number, BoardNumber[][] board) GetLastBoard()
     {
         var winnerBoards = new HashSet<BoardNumber[][]>();
 
         foreach (var number in _numbers)
         {
-            foreach (var board in _boards)
+            foreach (var board in _boards.Where(board => BoardWins(board, number)))
             {
-                if (BoardWins(board, number))
+                winnerBoards.Add(board);
+
+                if (winnerBoards.Count == _boards.Count)
                 {
-                    winnerBoards.Add(board);
-                    if (winnerBoards.Count == _boards.Count)
-                    {
-                        return (number, board);
-                    }
+                    return (number, board);
                 }
             }
         }
@@ -125,7 +123,7 @@ public class Day_04 : BaseDay
 
     public override ValueTask<string> Solve_1()
     {
-        var(number, board) = GetWinnerBoard();
+        var (number, board) = GetWinnerBoard();
 
 #if DEBUG
         PrintBoard(board);
@@ -138,7 +136,7 @@ public class Day_04 : BaseDay
 
     public override ValueTask<string> Solve_2()
     {
-        var(number, board) = GetLastBoard();
+        var (number, board) = GetLastBoard();
 
 #if DEBUG
         PrintBoard(board);
