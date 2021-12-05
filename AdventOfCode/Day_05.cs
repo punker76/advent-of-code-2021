@@ -29,17 +29,61 @@ public class Day_05 : BaseDay
 
         public bool IsPointOnLine(Point point)
         {
-            if (p1.X == p2.X && point.X == p1.X)
+            if (p1.X == p2.X)
             {
-                return (point.Y - p1.Y) * (p2.Y - point.Y) >= 0;
+                return point.X == p1.X && (point.Y - p1.Y) * (p2.Y - point.Y) >= 0;
             }
-            else if (p1.Y == p2.Y && point.Y == p1.Y)
+            else if (p1.Y == p2.Y)
             {
-                return (point.X - p1.X) * (p2.X - point.X) >= 0;
+                return point.Y == p1.Y && (point.X - p1.X) * (p2.X - point.X) >= 0;
 
             }
 
             return false;
+        }
+
+        public bool IsPointOnLine2(Point point)
+        {
+            if (p1.X == p2.X)
+            {
+                return point.X == p1.X && (point.Y - p1.Y) * (p2.Y - point.Y) >= 0;
+            }
+            else if (p1.Y == p2.Y)
+            {
+                return point.Y == p1.Y && (point.X - p1.X) * (p2.X - point.X) >= 0;
+            }
+
+            // use cross product to check if points is on line
+            var dx = p2.X - p1.X;
+            var dy = p2.Y - p1.Y;
+
+            // we don't need for dy 0 check here
+            if (Math.Abs(dx / dy) != 1)
+            {
+                return false;
+            }
+
+            var dxP = point.X - p1.X;
+            var dyP = point.Y - p1.Y;
+            var cross = dxP * dy - dyP * dx;
+
+            // point is on line if cross is 0
+            if (cross != 0)
+            {
+                return false;
+            }
+
+            // now check if points is between p1 and p2
+            if (Math.Abs(dx) >= Math.Abs(dy))
+            {
+                return dx > 0 ?
+                    p1.X <= point.X && point.X <= p2.X :
+                    p2.X <= point.X && point.X <= p1.X;
+            }
+
+            return dy > 0 ?
+                p1.Y <= point.Y && point.Y <= p2.Y :
+                p2.Y <= point.Y && point.Y <= p1.Y;
         }
     }
 
@@ -95,14 +139,31 @@ public class Day_05 : BaseDay
             });
         });
 
-        var result = points.Count(p => p.CoversLine >= 2); // 3990
+        var result = points.Count(p => p.CoversLine >= 2);
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 1 is {result}");
     }
 
     public override ValueTask<string> Solve_2()
     {
-        var result = 0;
+        var points = new List<Point>();
+
+        Parallel.For(_minX, _maxX + 1, (x, _) =>
+        {
+
+            Parallel.For(_minY, _maxY + 1, (y, _) =>
+            {
+                var point = new Point(x, y);
+                point.CoversLine = _lines.Count(l => l.IsPointOnLine2(point));
+                lock(points)
+                {
+                    points.Add(point);
+                }
+            });
+        });
+
+        var result = points.Count(p => p.CoversLine >= 2);
+
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
     }
 }
