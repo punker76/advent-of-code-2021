@@ -44,10 +44,11 @@ public class Day_05 : BaseDay
     }
 
     private readonly string[] _input;
-    // private readonly int[] _numbers;
     private readonly List<Line> _lines;
     private readonly string pattern = @"(?<x1>\d+),(?<y1>\d+) -> (?<x2>\d+),(?<y2>\d+)";
+    private int _minX = int.MaxValue;
     private int _maxX = 0;
+    private int _minY = int.MaxValue;
     private int _maxY = 0;
 
     public Day_05()
@@ -62,6 +63,9 @@ public class Day_05 : BaseDay
                 var p1 = new Point(int.Parse(matches[0].Groups["x1"].Value), int.Parse(matches[0].Groups["y1"].Value));
                 var p2 = new Point(int.Parse(matches[0].Groups["x2"].Value), int.Parse(matches[0].Groups["y2"].Value));
 
+                _minX = Math.Min(_minX, Math.Min(p1.X, p2.X));
+                _minY = Math.Min(_minY, Math.Min(p1.Y, p2.Y));
+
                 _maxX = Math.Max(_maxX, Math.Max(p1.X, p2.X));
                 _maxY = Math.Max(_maxY, Math.Max(p1.Y, p2.Y));
 
@@ -69,6 +73,7 @@ public class Day_05 : BaseDay
             })
             .ToList();
 
+        // Console.WriteLine($"min X = {_minX}, minY = {_minY}");
         // Console.WriteLine($"max X = {_maxX}, maxY = {_maxY}");
     }
 
@@ -76,15 +81,19 @@ public class Day_05 : BaseDay
     {
         var points = new List<Point>();
 
-        for (int x = 0; x <= _maxX; x++)
+        Parallel.For(_minX, _maxX + 1, (x, _) =>
         {
-            for (int y = 0; y <= _maxX; y++)
+
+            Parallel.For(_minY, _maxY + 1, (y, _) =>
             {
                 var point = new Point(x, y);
                 point.CoversLine = _lines.Count(l => l.IsPointOnLine(point));
-                points.Add(point);
-            }
-        }
+                lock(points)
+                {
+                    points.Add(point);
+                }
+            });
+        });
 
         var result = points.Count(p => p.CoversLine >= 2); // 3990
 
