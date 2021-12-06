@@ -6,10 +6,12 @@ public class Day_06 : BaseDay
     private class Fish
     {
         public int timer = -1;
+        public long amount = -1; // how many fishes
 
-        public Fish(int timer)
+        public Fish(int timer, long fishes)
         {
             this.timer = timer;
+            this.amount = fishes;
         }
 
         public bool CreateNewFish()
@@ -35,34 +37,48 @@ public class Day_06 : BaseDay
         _input = File.ReadAllLines(InputFilePath) [0];
     }
 
-    public override ValueTask<string> Solve_1()
+    private long GetNewFishCount(List<Fish> input)
+    {
+        long newFishCount = 0;
+        foreach (var fish in input)
+        {
+            if (fish.CreateNewFish())
+            {
+                newFishCount += fish.amount;
+            }
+        }
+        return newFishCount;
+    }
+
+    private long GetFishCount(int days)
     {
         var fishList = _input
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(t => new Fish(int.Parse(t)))
+            .Select(t => new Fish(int.Parse(t), 1))
             .ToList();
 
-        for (int i = 0; i < 80; i++)
+        for (int i = 0; i < days; i++)
         {
-            var newFishList = new List<Fish>();
-            foreach (var fish in fishList)
+            var newFishes = GetNewFishCount(fishList);
+            if (newFishes > 0)
             {
-                if (fish.CreateNewFish())
-                {
-                    newFishList.Add(new Fish(8));
-                }
+                fishList.Add(new Fish(8, newFishes));
             }
-            fishList.AddRange(newFishList);
         }
 
-        var result = fishList.Count;
+        return fishList.Sum(f => f.amount);
+    }
+
+    public override ValueTask<string> Solve_1()
+    {
+        var result = GetFishCount(80);
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 1 is {result}");
     }
 
     public override ValueTask<string> Solve_2()
     {
-        var result = 0;
+        var result = GetFishCount(256);
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
     }
