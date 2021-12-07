@@ -15,6 +15,17 @@ public class Day_07 : BaseDay
         {
             return Math.Abs(position - toPos);
         }
+
+        public int GetFuelForPosition2(int toPos)
+        {
+            var fuel = GetFuelForPosition(toPos);
+            var sum = 0;
+            for (var i = 0; i <= fuel; i++)
+            {
+                sum = sum + i;
+            }
+            return sum;
+        }
     }
 
     private readonly string _input;
@@ -35,7 +46,7 @@ public class Day_07 : BaseDay
         var maxPosition = _crabs.Max(c => c.position);
         var lowestFuel = (pos: 0, fuel: int.MaxValue);
 
-        for (int pos = 0; pos <= maxPosition; pos++)
+        for (int pos = 1; pos <= maxPosition; pos++)
         {
             var fuel = _crabs.Sum(c => c.GetFuelForPosition(pos));
             if (fuel < lowestFuel.fuel)
@@ -50,8 +61,19 @@ public class Day_07 : BaseDay
 
     public override ValueTask<string> Solve_2()
     {
-        var result = 0;
+        var maxPosition = _crabs.Max(c => c.position);
+        var lowestFuel = (pos: 0, fuel: int.MaxValue);
 
-        return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
+        for (int pos = 1; pos <= maxPosition; pos++)
+        {
+            var fuel = _crabs.Sum(c => c.GetFuelForPosition2(pos));
+            if (fuel < lowestFuel.fuel)
+            {
+                lowestFuel.fuel = fuel;
+                lowestFuel.pos = pos;
+            }
+        }
+
+        return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {lowestFuel.fuel} on {lowestFuel.pos}");
     }
 }
