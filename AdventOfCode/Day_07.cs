@@ -19,12 +19,7 @@ public class Day_07 : BaseDay
         public int GetFuelForPosition2(int toPos)
         {
             var fuel = GetFuelForPosition(toPos);
-            var sum = 0;
-            for (var i = 0; i <= fuel; i++)
-            {
-                sum = sum + i;
-            }
-            return sum;
+            return fuel * (fuel + 1) / 2;
         }
     }
 
