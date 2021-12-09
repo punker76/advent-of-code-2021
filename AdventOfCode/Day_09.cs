@@ -8,6 +8,7 @@ public class Day_09 : BaseDay
         public int y;
         public int height = 0;
         public bool lowest = false;
+        public int basinSize = 0;
 
         public Point(int x, int y, int value)
         {
@@ -100,25 +101,56 @@ public class Day_09 : BaseDay
         return map;
     }
 
+    private IEnumerable<Point> GetPointsAround2(Point point, Point[][] map)
+    {
+        var points = new HashSet<Point>();
+        foreach (var p in GetPointsAround(point, map).Where(p => p.height > point.height && p.height < 9))
+        {
+            points.Add(p);
+            foreach (var pp in GetPointsAround2(p, map))
+            {
+                points.Add(pp);
+            }
+        }
+        return points;
+    }
+
+    private Point[][] MarkLowestOnHeightmap2(Point[][] map)
+    {
+        foreach (var row in map)
+        {
+            foreach (var point in row)
+            {
+                point.lowest = IsLowestPoint(point, map);
+                if (point.lowest)
+                {
+                    var points = GetPointsAround2(point, map);
+                    point.basinSize = points.Count() + 1;
+                }
+            }
+        }
+
+        return map;
+    }
+
     public override ValueTask<string> Solve_1()
     {
-#if DEBUG
-        PrintHeightmap(_heightmap);
-#endif
         var map = MarkLowestOnHeightmap(_heightmap.Clone() as Point[][]);
-
-#if DEBUG
-        PrintHeightmap(map);
-#endif
-
-        var result = map.Sum(row => row.Where(p => p.lowest).Select(p => p.height + 1).Sum());
+        var result = map
+            .SelectMany(row => row.Where(p => p.lowest))
+            .Sum(p => p.height + 1);
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 1 is {result}");
     }
 
     public override ValueTask<string> Solve_2()
     {
-        var result = 0;
+        var map = MarkLowestOnHeightmap2(_heightmap.Clone() as Point[][]);
+        var result = map
+            .SelectMany(row => row.Where(p => p.lowest))
+            .OrderByDescending(p => p.basinSize)
+            .Take(3)
+            .Aggregate(1, (r, p) => r * p.basinSize);
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
     }
