@@ -15,29 +15,25 @@ public class Day_11 : BaseDay
         }
     }
 
-    private readonly DumboOcto[][] _input;
+    private readonly string[] _input;
 
     public Day_11()
     {
         // _input = new []
-        //     {
-        //         "5483143223",
-        //         "2745854711",
-        //         "5264556173",
-        //         "6141336146",
-        //         "6357385478",
-        //         "4167524645",
-        //         "2176841721",
-        //         "6882881134",
-        //         "4846848554",
-        //         "5283751526"
-        //     }
-        //     .Select((l, y) => l.ToCharArray().Select((o, x) => new DumboOcto(x, y, int.Parse(o.ToString()))).ToArray())
-        //     .ToArray();
+        // {
+        //     "5483143223",
+        //     "2745854711",
+        //     "5264556173",
+        //     "6141336146",
+        //     "6357385478",
+        //     "4167524645",
+        //     "2176841721",
+        //     "6882881134",
+        //     "4846848554",
+        //     "5283751526"
+        // };
 
-        _input = File.ReadAllLines(InputFilePath)
-            .Select((l, y) => l.ToCharArray().Select((o, x) => new DumboOcto(x, y, int.Parse(o.ToString()))).ToArray())
-            .ToArray();
+        _input = File.ReadAllLines(InputFilePath);
     }
 
     private void PrintGrid(DumboOcto[][] grid)
@@ -46,8 +42,7 @@ public class Day_11 : BaseDay
         {
             foreach (var octo in line)
             {
-                // Console.Write($"{octo.x},{octo.y}: {octo.energyLevel}  ");
-                Console.Write($"{octo.energyLevel}  ");
+                Console.Write($"{octo.energyLevel}");
             }
 
             Console.WriteLine();
@@ -69,8 +64,7 @@ public class Day_11 : BaseDay
 
                     if (x >= 0 && y >= 0 && x < grid[0].Count() && y < grid.Count())
                     {
-                        var o = grid[y][x];
-                        yield return o;
+                        yield return grid[y][x];
                     }
                 }
             }
@@ -97,31 +91,40 @@ public class Day_11 : BaseDay
         }
     }
 
+    private int GetFlashedOctos(DumboOcto[][] grid)
+    {
+        var flashedOctos = new HashSet<DumboOcto>();
+
+        foreach (var octo in grid.SelectMany(o => o))
+        {
+            octo.energyLevel++;
+        }
+
+        foreach (var octo in grid.SelectMany(o => o).Where(o => o.energyLevel > 9))
+        {
+            Flash(octo, flashedOctos, grid);
+        }
+
+        foreach (var octo in grid.SelectMany(o => o).Where(o => o.energyLevel > 9))
+        {
+            octo.energyLevel = 0;
+        }
+
+        return flashedOctos.Count();
+    }
+
     public override ValueTask<string> Solve_1()
     {
         var result = 0;
 
+        var octos = _input.Select((l, y) => l.ToCharArray().Select((o, x) => new DumboOcto(x, y, int.Parse(o.ToString()))).ToArray()).ToArray();
+
         for (int i = 0; i < 100; i++)
         {
-            var flashedOctos = new HashSet<DumboOcto>();
-
-            foreach (var octo in _input.SelectMany(o => o))
-            {
-                octo.energyLevel++;
-            }
-
-            foreach (var octo in _input.SelectMany(o => o).Where(o => o.energyLevel > 9))
-            {
-                Flash(octo, flashedOctos, _input);
-            }
-
-            foreach (var octo in _input.SelectMany(o => o).Where(o => o.energyLevel > 9))
-            {
-                octo.energyLevel = 0;
-            }
-
-            result += flashedOctos.Count();
+            result += GetFlashedOctos(octos);
         }
+
+        // PrintGrid(octos);
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 1 is {result}");
     }
@@ -129,6 +132,20 @@ public class Day_11 : BaseDay
     public override ValueTask<string> Solve_2()
     {
         var result = 0;
+
+        var octos = _input.Select((l, y) => l.ToCharArray().Select((o, x) => new DumboOcto(x, y, int.Parse(o.ToString()))).ToArray()).ToArray();
+
+        while (true)
+        {
+            ++result;
+            var flashedOctos = GetFlashedOctos(octos);
+            if (octos.SelectMany(o => o).All(o => o.energyLevel == 0))
+            {
+                break;
+            }
+        }
+
+        // PrintGrid(octos);
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
     }
