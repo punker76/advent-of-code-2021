@@ -77,9 +77,7 @@ public class Day_11 : BaseDay
         {
             flashedOctos.Add(octo);
 
-            var octosAround = GetOctoAround(octo, grid).Where(o => o.energyLevel < 10).ToList();
-
-            foreach (var o in octosAround)
+            GetOctoAround(octo, grid).Where(o => o.energyLevel < 10).ForEach(o =>
             {
                 o.energyLevel++;
 
@@ -87,7 +85,7 @@ public class Day_11 : BaseDay
                 {
                     Flash(o, flashedOctos, grid);
                 }
-            }
+            });
         }
     }
 
@@ -95,20 +93,9 @@ public class Day_11 : BaseDay
     {
         var flashedOctos = new HashSet<DumboOcto>();
 
-        foreach (var octo in grid.SelectMany(o => o))
-        {
-            octo.energyLevel++;
-        }
-
-        foreach (var octo in grid.SelectMany(o => o).Where(o => o.energyLevel > 9))
-        {
-            Flash(octo, flashedOctos, grid);
-        }
-
-        foreach (var octo in grid.SelectMany(o => o).Where(o => o.energyLevel > 9))
-        {
-            octo.energyLevel = 0;
-        }
+        grid.SelectMany(o => o).ForEach(o => { o.energyLevel++; });
+        grid.SelectMany(o => o).Where(o => o.energyLevel > 9).ForEach(o => Flash(o, flashedOctos, grid));
+        grid.SelectMany(o => o).Where(o => o.energyLevel > 9).ForEach(o => { o.energyLevel = 0; });
 
         return flashedOctos.Count();
     }
@@ -138,7 +125,7 @@ public class Day_11 : BaseDay
         while (true)
         {
             ++result;
-            var flashedOctos = GetFlashedOctos(octos);
+            GetFlashedOctos(octos);
             if (octos.SelectMany(o => o).All(o => o.energyLevel == 0))
             {
                 break;
