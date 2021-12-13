@@ -2,8 +2,6 @@
 
 public class Day_13 : BaseDay
 {
-    // [DebuggerDisplay("{name}")]
-
     private readonly string[] _input;
 
     private readonly bool[, ] _sheet;
@@ -84,6 +82,19 @@ public class Day_13 : BaseDay
         return result;
     }
 
+    public void PrintSheet(bool[, ] sheet)
+    {
+        for (int y = 0; y < sheet.GetLength(0); y++)
+        {
+            for (int x = 0; x < sheet.GetLength(1); x++)
+            {
+                Console.Write($"{(sheet[y, x]?"#":" ")}");
+            }
+            Console.WriteLine();
+        }
+        Console.WriteLine();
+    }
+
     public bool[, ] FoldHorizontal(bool[, ] sheet, int foldAt)
     {
         var my = sheet.GetLength(0);
@@ -162,8 +173,26 @@ public class Day_13 : BaseDay
 
     public override ValueTask<string> Solve_2()
     {
-        var result = 0;
+        var newSheet = _sheet;
 
-        return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
+        foreach ((string axis, int value) instruction in _instructions)
+        {
+            if (instruction.axis == "x")
+            {
+                // fold the paper left
+
+                newSheet = FoldVertical(newSheet, instruction.value);
+            }
+            else if (instruction.axis == "y")
+            {
+                // fold the paper up
+
+                newSheet = FoldHorizontal(newSheet, instruction.value);
+            }
+        }
+
+        PrintSheet(newSheet);
+
+        return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2");
     }
 }
