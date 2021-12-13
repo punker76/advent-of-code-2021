@@ -2,11 +2,11 @@
 
 public class Day_12 : BaseDay
 {
+    [DebuggerDisplay("{name}")]
     private class Cave
     {
         public string name;
         public HashSet<Cave> destinations = new();
-        public int visits = 0;
 
         public bool IsSmall()
         {
@@ -19,16 +19,16 @@ public class Day_12 : BaseDay
 
     public Day_12()
     {
-        _input = new []
-        {
-            "start-A",
-            "start-b",
-            "A-c",
-            "A-b",
-            "b-d",
-            "A-end",
-            "b-end"
-        };
+        // _input = new []
+        // {
+        //     "start-A",
+        //     "start-b",
+        //     "A-c",
+        //     "A-b",
+        //     "b-d",
+        //     "A-end",
+        //     "b-end"
+        // };
         // _input = new []
         // {
         //     "dc-end",
@@ -64,7 +64,7 @@ public class Day_12 : BaseDay
         //     "start-RW"
         // };
 
-        // _input = File.ReadAllLines(InputFilePath);
+        _input = File.ReadAllLines(InputFilePath);
 
         foreach (var line in _input)
         {
@@ -129,6 +129,18 @@ public class Day_12 : BaseDay
         var stack = new Stack<Cave[]>();
         stack.Push(new [] { start });
 
+        bool has2EqualSmallCaves(Cave[] path)
+        {
+            foreach (var p in path.Where(c => c.IsSmall()).Reverse())
+            {
+                if (path.Count(c => c == p) == 2)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         void walkthrough(Cave[] path)
         {
             var last = path.LastOrDefault();
@@ -148,7 +160,7 @@ public class Day_12 : BaseDay
                         newPath.Add(next);
                         stack.Push(newPath.ToArray());
                     }
-                    else if (next.name != "start" && next.IsSmall() && path.Count(c => c == next) == 1)
+                    else if (next.name != "start" && next.IsSmall() && !has2EqualSmallCaves(path))
                     {
                         var newPath = new List<Cave>(path);
                         newPath.Add(next);
