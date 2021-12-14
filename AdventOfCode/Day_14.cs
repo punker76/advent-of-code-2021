@@ -27,7 +27,8 @@ public class Day_14 : BaseDay
         //     "BB -> N",
         //     "BC -> B",
         //     "CC -> N",
-        //     "CN -> C"
+        //     "CN -> C",
+        //     ""
         // };
         _input = File.ReadAllLines(InputFilePath);
 
@@ -38,22 +39,21 @@ public class Day_14 : BaseDay
             .Select(l =>
             {
                 var rule = l.Split(" -> ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                return (rule[0], rule[0][0] + rule[1] + rule[0][1]);
+                return (rule[0], rule[1]);
             })
             .ToDictionary(x => x.Item1, x => x.Item2);
     }
 
-    public StringBuilder Process(StringBuilder template)
+    private StringBuilder Process(StringBuilder template)
     {
         var polymer = new StringBuilder();
         polymer.Append(template[0]);
         for (int i = 0; i < template.Length - 1; i++)
         {
             var pair = $"{template[i]}{template[i+1]}";
-            if (_rules.TryGetValue(pair, out var result))
+            if (_rules.TryGetValue(pair, out var rule))
             {
-                polymer.Remove(polymer.Length - 1, 1);
-                polymer.Append(result);
+                polymer.Append($"{rule}{template[i+1]}");
             }
         }
         return polymer;
@@ -66,19 +66,57 @@ public class Day_14 : BaseDay
         for (int step = 1; step <= 10; step++)
         {
             template = Process(template);
-
         }
 
         var grouped = template.ToString().ToCharArray().GroupBy(c => c).OrderBy(g => g.Count());
-
         var result = grouped.Last().Count() - grouped.First().Count();
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 1 is {result}");
     }
 
+    private void AddPairs(Dictionary<string, long> pairs, string pair, long count)
+    {
+        if (pairs.ContainsKey(pair))
+        {
+            pairs[pair] += count;
+        }
+        else
+        {
+            pairs.Add(pair, count);
+        }
+    }
+
     public override ValueTask<string> Solve_2()
     {
-        var result = 0;
+        Dictionary<string, long> chars = new();
+        for (int i = 0; i < _polymerTemplate.Length; i++)
+        {
+            AddPairs(chars, _polymerTemplate[i].ToString(), 1);
+        }
+
+        Dictionary<string, long> pairs = new();
+        for (int i = 0; i < _polymerTemplate.Length - 1; i++)
+        {
+            var pair = $"{_polymerTemplate[i]}{_polymerTemplate[i+1]}";
+            AddPairs(pairs, pair, 1);
+        }
+
+        for (int step = 1; step <= 40; step++)
+        {
+            Dictionary<string, long> pairs2 = new();
+            foreach (var pair in pairs)
+            {
+                if (_rules.TryGetValue(pair.Key, out var rule))
+                {
+                    AddPairs(chars, rule, pair.Value);
+                    AddPairs(pairs2, $"{pair.Key[0]}{rule}", pair.Value);
+                    AddPairs(pairs2, $"{rule}{pair.Key[1]}", pair.Value);
+                }
+            }
+            pairs = pairs2;
+        }
+
+        var result = (chars.Values.Max() - chars.Values.Min());
 
         return new($"Solution to {ClassPrefix} {CalculateIndex()}, part 2 is {result}");
     }
